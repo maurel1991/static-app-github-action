@@ -120,7 +120,7 @@ resource "aws_s3_bucket_website_configuration" "bucket" {
 # ------------------ Fetch existing ACM certificate ------------------
 
 data "aws_acm_certificate" "existing_cert" {
-  domain      = var.domain_name
+  domain      = "*.${var.domain_name}"
   statuses    = ["ISSUED"]
   most_recent = true
 }
