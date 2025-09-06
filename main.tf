@@ -119,23 +119,23 @@ resource "aws_s3_bucket_website_configuration" "bucket" {
 
 # ------------------ Fetch existing ACM certificate ------------------
 
-# data "aws_acm_certificate" "existing_cert" {
-#   domain      = var.domain_name
-#   statuses    = ["ISSUED"]
-#   most_recent = true
-# }
+data "aws_acm_certificate" "existing_cert" {
+  domain      = var.domain_name
+  statuses    = ["ISSUED"]
+  most_recent = true
+}
 
 # ------------------ Lookup Route 53 Hosted Zone by Domain ------------------
 
 # Automatically find hosted zone (you can use root domain or subdomain)
-# data "aws_route53_zone" "target" {
-#   name         = "${var.domain_name}."  # ensure trailing dot
-#   private_zone = false
-# }
+data "aws_route53_zone" "target" {
+  name         = "${var.domain_name}."  # ensure trailing dot
+  private_zone = false
+}
 
-# locals {
-#   full_domain = "${var.subdomain}.${var.domain_name}" 
-# }
+locals {
+  full_domain = "${var.subdomain}.${var.domain_name}" 
+}
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~ Configure CloudFont ~~~~~~~~~~~~~~~~~~~~~
@@ -198,17 +198,17 @@ resource "aws_cloudfront_distribution" "web-distribution" {
 
 # ------------------ Route 53 DNS Record ------------------
 
-# resource "aws_route53_record" "cdn_record" {
-#   zone_id = data.aws_route53_zone.target.zone_id
-#   name    = local.full_domain
-#   type    = "A"
+resource "aws_route53_record" "cdn_record" {
+  zone_id = data.aws_route53_zone.target.zone_id
+  name    = local.full_domain
+  type    = "A"
 
-#   alias {
-#     name                   = aws_cloudfront_distribution.web-distribution.domain_name
-#     zone_id                = aws_cloudfront_distribution.web-distribution.hosted_zone_id
-#     evaluate_target_health = false
-#   }
-# }
+  alias {
+    name                   = aws_cloudfront_distribution.web-distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.web-distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
 
 # ------------------ Outputs ------------------
 
@@ -216,8 +216,8 @@ output "cloudfront_distribution_url" {
   value = "https://${aws_cloudfront_distribution.web-distribution.domain_name}"
 }
 
-# output "cdn_custom_domain" {
-#   value = "https://${local.full_domain}"
-# }
+output "cdn_custom_domain" {
+  value = "https://${local.full_domain}"
+}
 
 

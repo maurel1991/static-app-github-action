@@ -19,14 +19,14 @@ variable "file-key" {
   default = "index.html"
 }
 
-# variable "domain_name" {
-#   type    = string
-#   default = "jamafrik.store" # e.g. www.example.com
-# }     
+variable "domain_name" {
+  type    = string
+  default = "jamafrik.store" # e.g. www.example.com
+}     
  
 variable "subdomain" {
   type        = string
-  default = "food" #Subdomain prefix (e.g. 'food')"
+  default = "food4all" #Subdomain prefix (e.g. 'food')"
 }
 
 
