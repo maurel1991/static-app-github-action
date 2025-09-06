@@ -158,36 +158,84 @@ locals {
   s3_domain_name = "${var.bucket_name}.s3-website.${var.region}.amazonaws.com"
 }
 
+# resource "aws_cloudfront_distribution" "web-distribution" {
+  
+#   enabled = true
+  
+#   origin {
+#     origin_id                = local.s3_origin_id
+#     domain_name              = local.s3_domain_name
+#     custom_origin_config {
+#       http_port              = 80
+#       https_port             = 443
+#       origin_protocol_policy = "http-only"
+#       origin_ssl_protocols   = ["TLSv1"]
+#     }
+#   }
+
+#   default_cache_behavior {
+    
+#     target_origin_id = local.s3_origin_id
+#     allowed_methods  = ["GET", "HEAD"]
+#     cached_methods   = ["GET", "HEAD"]
+
+#     forwarded_values {
+#       query_string = true
+
+#       cookies {
+#         forward = "all"
+#       }
+#     }
+
+#     viewer_protocol_policy = "redirect-to-https"
+#     min_ttl                = 0
+#     default_ttl            = 0
+#     max_ttl                = 0
+#   }
+
+#   restrictions {
+#     geo_restriction {
+#       restriction_type = "none"
+#     }
+#   }
+  
+#   viewer_certificate {
+#     cloudfront_default_certificate = true
+#   }
+
+#   price_class = "PriceClass_200"
+
+#   depends_on = [ aws_s3_bucket.bucket1 , null_resource.upload_files, aws_s3_bucket_acl.bucket1-acl, aws_s3_bucket_policy.allow_access ]
+  
+# }
 resource "aws_cloudfront_distribution" "web-distribution" {
-  
   enabled = true
-  
+
   origin {
-    origin_id                = local.s3_origin_id
-    domain_name              = local.s3_domain_name
+    origin_id   = local.s3_origin_id
+    domain_name = local.s3_domain_name
+
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1"]
+      origin_protocol_policy = "https-only"   # HTTPS vers le bucket
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
 
   default_cache_behavior {
-    
     target_origin_id = local.s3_origin_id
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
 
     forwarded_values {
       query_string = true
-
       cookies {
         forward = "all"
       }
     }
 
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "redirect-to-https"  # Force HTTPS
     min_ttl                = 0
     default_ttl            = 0
     max_ttl                = 0
@@ -198,15 +246,23 @@ resource "aws_cloudfront_distribution" "web-distribution" {
       restriction_type = "none"
     }
   }
-  
+
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = data.aws_acm_certificate.existing_cert.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
+
+  aliases = [local.full_domain]  # food4all.jamafrik.store
 
   price_class = "PriceClass_200"
 
-  depends_on = [ aws_s3_bucket.bucket1 , null_resource.upload_files, aws_s3_bucket_acl.bucket1-acl, aws_s3_bucket_policy.allow_access ]
-  
+  depends_on = [
+    aws_s3_bucket.bucket1,
+    null_resource.upload_files,
+    aws_s3_bucket_acl.bucket1-acl,
+    aws_s3_bucket_policy.allow_access
+  ]
 }
 
 # ------------------ Route 53 DNS Record ------------------
