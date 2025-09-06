@@ -21,7 +21,7 @@ variable "file-key" {
 
 variable "domain_name" {
   type    = string
-  default = "jamafrik.store" # e.g. www.example.com
+  default = "*.jamafrik.store" # e.g. www.example.com
 }     
  
 variable "subdomain" {
