@@ -12,6 +12,11 @@ terraform {
 provider "aws" {
   region = var.region
 }
+
+provider "aws" {
+  alias  = "useast1"
+  region = "us-east-1"
+}
  
 # ~~~~~~~~~~~ Configure the remote BACKEND to enable others to work on the same code ~~~~~~~~~~~ #
 
@@ -119,11 +124,19 @@ resource "aws_s3_bucket_website_configuration" "bucket" {
 
 # ------------------ Fetch existing ACM certificate ------------------
 
+# data "aws_acm_certificate" "existing_cert" {
+#   domain      = "*.${var.domain_name}"
+#   statuses    = ["ISSUED"]
+#   most_recent = true
+# }
+
 data "aws_acm_certificate" "existing_cert" {
   domain      = "*.${var.domain_name}"
   statuses    = ["ISSUED"]
   most_recent = true
+  provider    = aws.useast1
 }
+
 
 # ------------------ Lookup Route 53 Hosted Zone by Domain ------------------
 
